@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      {% if title %}
+      <title>{{ title }} - Hospital Heippi API Rest</title>
+      {% else %}
+      <title>Hospital Heippi API Rest</title>
+      {% endif %}
+    </head>
+    <body>
+        <div>
+            <a href="/">Inicio</a>
+            <a href="/login">Login</a>
+        </div>
+        <hr>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </body>
+</html>
