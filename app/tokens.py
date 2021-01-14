@@ -3,9 +3,9 @@ from itsdangerous import URLSafeTimedSerializer
 from app import app
 
 
-def generate_confirmation_token(email):
+def generate_confirmation_token(personal_id):
     serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
-    return serializer.dumps(email, salt=app.config['SECURITY_PASSWORD_SALT'])
+    return serializer.dumps(personal_id, salt=app.config['SECURITY_PASSWORD_SALT'])
 
 
 def confirm_token(token, expiration=3600):

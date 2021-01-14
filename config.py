@@ -2,7 +2,7 @@ import os
 
 
 class Config(object):
-    SECRET_KEY = os.urandom(32)
+    SECRET_KEY = 'HeippiPrueba'
     basedir = os.path.abspath(os.path.dirname(__file__))
     SQLALCHEMY_ECHO = False
     SQLALCHEMY_TRACK_MODIFICATIONS = True

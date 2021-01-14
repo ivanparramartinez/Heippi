@@ -23,12 +23,16 @@ def register():
         return redirect(url_for('index'))
     form = RegistrationForm()
     if form.validate_on_submit():
+        exists = bool(Users.query.filter_by(personal_id=form.personal_id.data).first())
+        if exists:
+            flash("El usuario ya está registrado")
+            return redirect(url_for('index'))
         user = Users(public_id=str(uuid.uuid4()), personal_id=form.personal_id.data,
                      password=generate_password_hash(form.password.data), email=form.email.data, phone=form.phone.data,
                      kind=request.form.get('kind'), confirmed=False)
         db.session.add(user)
         db.session.commit()
-        token = generate_confirmation_token(form.email.data)
+        token = generate_confirmation_token(form.personal_id.data)
         confirm_url = url_for('confirm_email', token=token, _external=True)
         html = render_template('activateuser.html', confirm_url=confirm_url)
         subject = "Please confirm your email"
@@ -45,7 +49,6 @@ def register():
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
-
     form = LoginForm()
     if form.validate_on_submit():
         user = Users.query.filter_by(personal_id=form.personal_id.data).first()
@@ -88,15 +91,13 @@ def logout():
         return render_template('notlogged.html', title='Home')
 
 
-
 @app.route('/confirm/<token>')
-@login_required
 def confirm_email(token):
     try:
-        email = confirm_token(token)
+        personal_id = confirm_token(token)
     except:
         flash('El link de confirmación es erróneo o ha expirado')
-    user = Users.query.filter_by(email=email).first_or_404()
+    user = Users.query.filter_by(personal_id=personal_id).first_or_404()
     if user.confirmed:
         flash('Esta cuenta ya ha sido confirmada, por favor inicie sesión.')
     else:
