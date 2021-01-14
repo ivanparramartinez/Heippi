@@ -1,22 +1,82 @@
-from extensions import db
+from app import db, login_manager
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
+import datetime
 
-class Users(db.Model):
-  id = db.Column(db.Integer, primary_key=True)
-  public_id = db.Column(db.String(200))
-  personal_id = db.Column(db.String(15))
-  password = db.Column(db.String(200))
-  email = db.Column(db.String(50))
-  phone = db.Column(db.String(15))
-  kind = db.Column(db.String(20))
-  confirmed = db.Column(db.Boolean)
 
-  def __repr__(self):
-    return '<User {}>'.format(self.personal_id)
+@login_manager.user_loader
+def user_loader(user_id):
+    user = Users.query.filter_by(id=user_id).first()
+    if user:
+        return user
+    return None
 
-class Authors(db.Model):
-  id = db.Column(db.Integer, primary_key=True)
-  name = db.Column(db.String(50), unique=True, nullable=False)
-  book = db.Column(db.String(20), unique=True, nullable=False)
-  country = db.Column(db.String(50), nullable=False)
-  booker_prize = db.Column(db.Boolean)
-  user_id = db.Column(db.Integer)
+
+class Users(db.Model, UserMixin):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    public_id = db.Column(db.String(200))
+    personal_id = db.Column(db.String(15), unique=True)
+    name = db.Column(db.String(50))
+    address = db.Column(db.String(300))
+    medical_services = db.Column(db.String(200))
+    is_doctor = db.Column(db.Boolean)
+    dob = db.Column(db.DateTime)
+    password = db.Column(db.String(200))
+    email = db.Column(db.String(50))
+    phone = db.Column(db.String(15))
+    kind = db.Column(db.String(20))
+    registered_on = db.Column(db.DateTime, nullable=False)
+    confirmed = db.Column(db.Boolean)
+
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
+
+    def __init__(self, public_id, personal_id, password, email, phone, kind, confirmed):
+        self.public_id = public_id
+        self.personal_id = personal_id
+        self.password = password
+        self.email = email
+        self.phone = phone
+        self.kind = kind
+        self.registered_on = datetime.datetime.now()
+        self.confirmed = confirmed
+
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.id
+
+    def __repr__(self):
+        return '<email {}'.format(self.email)
+
+
+class Registros(db.Model):
+    __tablename__ = 'registros'
+    id = db.Column(db.Integer, primary_key=True)
+    public_id = db.Column(db.String(200))
+    personal_id = db.Column(db.String(15), unique=True)
+    med_obs = db.Column(db.String(200))
+    spec = db.Column(db.String(50))
+    estado_salud = db.Column(db.String(20))
+    kind = db.Column(db.String(20))
+
+    def __init__(self, public_id, personal_id, password, email, phone, kind, confirmed):
+        self.public_id = public_id
+        self.personal_id = personal_id
+        self.password = password
+        self.email = email
+        self.phone = phone
+        self.kind = kind
+        self.registered_on = datetime.datetime.now()
+        self.confirmed = confirmed
