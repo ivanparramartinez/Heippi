@@ -85,7 +85,7 @@ class PacientUsers(db.Model, UserMixin):
     personal_id = db.Column(db.String(15), unique=True)
     name = db.Column(db.String(50))
     address = db.Column(db.String(300))
-    dob = db.Column(db.DateTime)
+    dob = db.Column(db.Date)
     last_logged_in = db.Column(db.DateTime)
 
     def __init__(self, public_id, personal_id, name, address, dob, last_logged_in):

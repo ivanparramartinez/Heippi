@@ -3,7 +3,6 @@ from flask import jsonify, request, render_template, make_response, flash, redir
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.models import Users, HospitalUsers, PacientUsers
 import uuid
-import jwt
 import datetime
 from app.tokens import generate_confirmation_token, confirm_token
 from flask_login import login_required, login_user, logout_user, current_user
@@ -73,9 +72,9 @@ def login():
             else:
                 flash('Hospital')
                 return redirect(url_for('updatefirsthospital'))
-        elif user.kind == 'Paciente':
-            exists = bool(PacientUsers.query.filter_by(personal_id=form.personal_id.data).first())
-            if exists:
+        else:
+            exists2 = bool(PacientUsers.query.filter_by(personal_id=form.personal_id.data).first())
+            if exists2:
                 pacientuser = PacientUsers.query.filter_by(personal_id=form.personal_id.data).first()
                 if (pacientuser.name is None) or (pacientuser.address is None) or (
                         pacientuser.dob is None):
@@ -116,7 +115,7 @@ def confirm_email(token):
 
 @app.route('/updatefirsthospital', methods=['GET', 'POST'])
 def updatefirsthospital():
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and current_user.kind == 'Hospital':
         form = HospitalForm()
         if form.validate_on_submit():
             hospitaluser = HospitalUsers(public_id=current_user.public_id, personal_id=current_user.personal_id,
@@ -134,17 +133,19 @@ def updatefirsthospital():
 
 @app.route('/updatefirstpacient', methods=['GET', 'POST'])
 def updatefirstpacient():
-    if current_user.is_authenticated:
-        form = PacientForm()
-        if form.validate_on_submit():
+    if current_user.is_authenticated and current_user.kind == 'Paciente':
+        form1 = PacientForm()
+        if form1.validate_on_submit():
             pacientuser = PacientUsers(public_id=current_user.public_id, personal_id=current_user.personal_id,
-                                       name=form.name.data, address=form.address.data,
-                                       dob=form.dob.data,
+                                       name=form1.name.data, address=form1.address.data, dob=request.form.get('dob'),
                                        last_logged_in=current_user.last_logged_in)
-            db.session.add(pacientuser)
-            db.session.commit()
-            flash('Se ha actualizado la información')
-            return redirect(url_for('index'))
-        return render_template('pacient.html', title='Actualización de Datos', form=form)
+            try:
+                db.session.add(pacientuser)
+                db.session.commit()
+                flash('Se ha actualizado la información')
+                return redirect(url_for('index'))
+            except:
+                flash('no actualiza')
+        return render_template('pacient.html', title='Actualización de Datos', form=form1)
     else:
         return redirect(url_for('login'))

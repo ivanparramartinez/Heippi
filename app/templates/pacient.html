@@ -21,8 +21,8 @@
             {% endfor %}
         </p>
         <p>
-            {{ form.dob.label }}<br>
-            {{ form.dob }}<br>
+            {{ form.dob.label }} (YYYY-MM-DD)<br>
+            {{ form.dob(class='datepicker') }}<br>
         </p>
         <p>{{ form.submit() }}</p>
     </form>
