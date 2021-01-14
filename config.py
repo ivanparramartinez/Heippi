@@ -17,7 +17,7 @@ class Config(object):
 
     # gmail authentication
     MAIL_USERNAME = "pruebasdesarrolloivan@gmail.com"
-    MAIL_PASSWORD = "pruebas2020"
+    MAIL_PASSWORD = "pruebas2021"
 
     # mail accounts
     MAIL_DEFAULT_SENDER = 'pruebasdesarrolloivan@gmail.com'
