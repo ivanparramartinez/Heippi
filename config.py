@@ -16,8 +16,8 @@ class Config(object):
     MAIL_USE_SSL = True
 
     # gmail authentication
-    MAIL_USERNAME = "nesivapama@gmail.com"
-    MAIL_PASSWORD = "Onemen3185"
+    MAIL_USERNAME = "pruebasdesarrolloivan@gmail.com"
+    MAIL_PASSWORD = "Onemen2020"
 
     # mail accounts
-    MAIL_DEFAULT_SENDER = 'nesivapama@gmail.com'
+    MAIL_DEFAULT_SENDER = 'pruebasdesarrolloivan@gmail.com'
