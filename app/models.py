@@ -28,6 +28,7 @@ class Users(db.Model, UserMixin):
     kind = db.Column(db.String(20))
     registered_on = db.Column(db.DateTime, nullable=False)
     confirmed = db.Column(db.Boolean)
+    last_logged_in = db.Column(db.DateTime)
 
     def set_password(self, password):
         self.password = generate_password_hash(password)

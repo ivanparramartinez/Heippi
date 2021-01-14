@@ -35,11 +35,9 @@ def register():
         token = generate_confirmation_token(form.personal_id.data)
         confirm_url = url_for('confirm_email', token=token, _external=True)
         html = render_template('activateuser.html', confirm_url=confirm_url)
-        subject = "Please confirm your email"
+        subject = "Confirmación de cuenta. Hospital Heippi."
         send_email(form.email.data, subject, html)
-
-        flash('A confirmation email has been sent via email.', 'success')
-        flash('Congratulations, you are now a registered user!')
+        flash('Se ha enviado un correo con el link para confirmar su cuenta.')
         return redirect(url_for('login'))
     dropdown_list = ['Hospital', 'Paciente']
     return render_template('register.html', title='Register', form=form, dropdown_list=dropdown_list)
@@ -58,6 +56,13 @@ def login():
         if not user.confirmed:
             flash('Por favor confirmar tu cuenta antes de iniciar sesión.')
             return redirect(url_for('login'))
+        if user.last_logged_in is None:
+            flash('Es la primera vez que inicias sesión')
+            user.last_logged_in = datetime.datetime.utcnow()
+            if user.is_doctor:
+                flash('Debes cambiar tu contraseña')
+            db.session.add(user)
+            db.session.commit()
         login_user(user, remember=form.remember_me.data)
         return redirect(url_for('index'))
     return render_template('login.html', title='Sign In', form=form)
@@ -105,4 +110,5 @@ def confirm_email(token):
         db.session.add(user)
         db.session.commit()
         flash('¡Has confirmado tu cuenta! ¡Gracias!')
+        login_user(user)
     return redirect(url_for('index'))

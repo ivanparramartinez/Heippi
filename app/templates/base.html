@@ -10,9 +10,15 @@
     <body>
         <div>
             <a href="/">Inicio</a>
-            <a href="/register">Register</a>
-            <a href="/login">Login</a>
-            <a href="/logout">Logout</a>
+            {% if current_user.is_authenticated %}
+            {% else %}
+            <a href="/register">Registrarse</a>
+            {% endif %}
+            {% if current_user.is_authenticated %}
+            <a href="/logout">Cerrar Sesión</a>
+            {% else %}
+            <a href="/login">Iniciar Sesión</a>
+            {% endif %}
         </div>
         <hr>
         {% with messages = get_flashed_messages() %}
