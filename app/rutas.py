@@ -1,14 +1,14 @@
 from app import app, db
 from flask import jsonify, request, render_template, make_response, flash, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
-from app.models import Users
+from app.models import Users, HospitalUsers
 import uuid
 import jwt
 import datetime
 from app.tokens import generate_confirmation_token, confirm_token
 from flask_login import login_required, login_user, logout_user, current_user
 from app.email import send_email
-from formularios import LoginForm, RegistrationForm
+from formularios import LoginForm, RegistrationForm, HospitalForm
 
 
 @app.route('/')
@@ -56,35 +56,16 @@ def login():
         if not user.confirmed:
             flash('Por favor confirmar tu cuenta antes de iniciar sesión.')
             return redirect(url_for('login'))
+        if user.kind == 'Hospital':
+            updatefirst()
         if user.last_logged_in is None:
             flash('Es la primera vez que inicias sesión')
             user.last_logged_in = datetime.datetime.utcnow()
-            if user.is_doctor:
-                flash('Debes cambiar tu contraseña')
             db.session.add(user)
             db.session.commit()
         login_user(user, remember=form.remember_me.data)
         return redirect(url_for('index'))
     return render_template('login.html', title='Sign In', form=form)
-
-
-@app.route('/otrologin')
-def otrologin():
-    data = request.get_json()
-    auth = request.authorization
-
-    if not auth or not auth.username or not auth.password:
-        return make_response('No se pudo verificar', 401, {'WWW.Authentication': 'Basic realm: "login required"'})
-
-    user = Users.query.filter_by(personal_id=data['personal_id']).first()
-    if check_password_hash(user.password, data['password']):
-        token = jwt.encode(
-            {'public_id': user.public_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
-            app.config['SECRET_KEY'])
-        token_decoded = jwt.decode(token, app.config['SECRET_KEY'], algorithms="HS256")
-        return jsonify({'token': token_decoded['public_id']})
-
-    return make_response('No se pudo verificar', 401, {'WWW.Authentication': 'Basic realm: "login required"'})
 
 
 @app.route('/logout')
@@ -110,5 +91,27 @@ def confirm_email(token):
         db.session.add(user)
         db.session.commit()
         flash('¡Has confirmado tu cuenta! ¡Gracias!')
-        login_user(user)
-    return redirect(url_for('index'))
+    return redirect(url_for('login'))
+
+
+@app.route('/checkuser', methods=['GET', 'POST'])
+@login_required
+def checkuser():
+    user_id = current_user.personal_id
+    return jsonify({'id': user_id})
+
+
+@app.route('/updatefirst', methods=['GET', 'POST'])
+def updatefirst():
+    if current_user.is_authenticated:
+        form = HospitalForm()
+        if form.validate_on_submit():
+            hospitaluser = HospitalUsers(public_id=current_user.public_id, personal_id=current_user.personal_id,
+                         name=form.name.data, address=form.address.data, medical_services=form.medical_services.data, last_logged_in=current_user.last_logged_in)
+            db.session.add(hospitaluser)
+            db.session.commit()
+            flash('Se ha actualizado la información')
+            return redirect(url_for('index'))
+        return render_template('hospital.html', title='Actualización de Datos', form=form)
+    else:
+        return redirect(url_for('login'))

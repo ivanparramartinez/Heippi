@@ -17,10 +17,6 @@ class Users(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     public_id = db.Column(db.String(200))
     personal_id = db.Column(db.String(15), unique=True)
-    name = db.Column(db.String(50))
-    address = db.Column(db.String(300))
-    medical_services = db.Column(db.String(200))
-    is_doctor = db.Column(db.Boolean)
     dob = db.Column(db.DateTime)
     password = db.Column(db.String(200))
     email = db.Column(db.String(50))
@@ -60,6 +56,26 @@ class Users(db.Model, UserMixin):
 
     def __repr__(self):
         return '<email {}'.format(self.email)
+
+
+class HospitalUsers(db.Model, UserMixin):
+    __tablename__ = 'hospitalusers'
+    id = db.Column(db.Integer, primary_key=True)
+    public_id = db.Column(db.String(200))
+    personal_id = db.Column(db.String(15), unique=True)
+    name = db.Column(db.String(50))
+    address = db.Column(db.String(300))
+    medical_services = db.Column(db.String(200))
+    is_doctor = db.Column(db.Boolean)
+    last_logged_in = db.Column(db.DateTime)
+
+    def __init__(self, public_id, personal_id, name, address, medical_services, last_logged_in):
+        self.public_id = public_id
+        self.personal_id = personal_id
+        self.name = name
+        self.address = address
+        self.medical_services = medical_services
+        self.last_logged_in = last_logged_in
 
 
 class Registros(db.Model):

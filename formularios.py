@@ -16,3 +16,9 @@ class RegistrationForm(FlaskForm):
     password = PasswordField('Contraseña', validators=[DataRequired()])
     password2 = PasswordField('Repetir Contraseña', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Registrarse')
+
+class HospitalForm(FlaskForm):
+    name = StringField('Nombre', validators=[DataRequired()])
+    address = StringField('Dirección', validators=[DataRequired()])
+    medical_services = StringField('Servicios Médicos', validators=[DataRequired()])
+    submit = SubmitField('Actualizar Datos')
