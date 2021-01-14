@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField
 from wtforms.fields.html5 import DateField
-from wtforms.validators import DataRequired, EqualTo, Email
+from wtforms.validators import DataRequired, EqualTo, Email, Length
 
 
 class LoginForm(FlaskForm):
@@ -34,3 +34,9 @@ class PacientForm(FlaskForm):
     address = StringField('Dirección', validators=[DataRequired()])
     dob = DateField('Fecha de Nacimiento', format='%Y-%m-%d', validators=[DataRequired()])
     submit = SubmitField('Actualizar Datos')
+
+
+class ChangePasswordForm(FlaskForm):
+    password = PasswordField('Contraseña', validators=[DataRequired(), Length(min=6, max=255)])
+    password2 = PasswordField('Repetir Contraseña', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Actualizar Contraseña')

@@ -1,5 +1,5 @@
 from app import app, db
-from flask import jsonify, request, render_template, make_response, flash, redirect, url_for
+from flask import jsonify, request, render_template, flash, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.models import Users, HospitalUsers, PacientUsers
 import uuid
@@ -7,13 +7,12 @@ import datetime
 from app.tokens import generate_confirmation_token, confirm_token
 from flask_login import login_required, login_user, logout_user, current_user
 from app.email import send_email
-from formularios import LoginForm, RegistrationForm, HospitalForm, PacientForm
+from formularios import LoginForm, RegistrationForm, HospitalForm, PacientForm, ChangePasswordForm
 
 
 @app.route('/')
 def index():
-    user = {'username': 'Miguel'}
-    return render_template('index.html', title='Home', user=user)
+    return render_template('index.html', title='Inicio')
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -149,3 +148,20 @@ def updatefirstpacient():
         return render_template('pacient.html', title='Actualización de Datos', form=form1)
     else:
         return redirect(url_for('login'))
+
+
+@app.route('/changepassword', methods=['GET', 'POST'])
+@login_required
+def changepassword():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        user = Users.query.filter_by(personal_id=current_user.personal_id).first()
+        if user:
+            current_user.password = generate_password_hash(form.password.data)
+            db.session.commit()
+            flash('Contraseña Actualizada')
+            return redirect(url_for('changepassword'))
+        else:
+            flash('Contraseña no Actualizada')
+            return redirect(url_for('changepassword'))
+    return render_template('changepassword.html', form=form)
