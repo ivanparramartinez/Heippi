@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, IntegerField, SelectField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, IntegerField, SelectField, DateField
 from wtforms.validators import DataRequired, EqualTo
 
 class LoginForm(FlaskForm):
@@ -21,4 +21,11 @@ class HospitalForm(FlaskForm):
     name = StringField('Nombre', validators=[DataRequired()])
     address = StringField('Dirección', validators=[DataRequired()])
     medical_services = StringField('Servicios Médicos', validators=[DataRequired()])
+    is_doctor = BooleanField('¿Es Médico?')
+    submit = SubmitField('Actualizar Datos')
+
+class PacientForm(FlaskForm):
+    name = StringField('Nombre', validators=[DataRequired()])
+    address = StringField('Dirección', validators=[DataRequired()])
+    dob = DateField('Fecha de Nacimiento', validators=[DataRequired()])
     submit = SubmitField('Actualizar Datos')

@@ -1,14 +1,14 @@
 from app import app, db
 from flask import jsonify, request, render_template, make_response, flash, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
-from app.models import Users, HospitalUsers
+from app.models import Users, HospitalUsers, PacientUsers
 import uuid
 import jwt
 import datetime
 from app.tokens import generate_confirmation_token, confirm_token
 from flask_login import login_required, login_user, logout_user, current_user
 from app.email import send_email
-from formularios import LoginForm, RegistrationForm, HospitalForm
+from formularios import LoginForm, RegistrationForm, HospitalForm, PacientForm
 
 
 @app.route('/')
@@ -56,14 +56,34 @@ def login():
         if not user.confirmed:
             flash('Por favor confirmar tu cuenta antes de iniciar sesión.')
             return redirect(url_for('login'))
-        if user.kind == 'Hospital':
-            updatefirst()
+        login_user(user, remember=form.remember_me.data)
         if user.last_logged_in is None:
             flash('Es la primera vez que inicias sesión')
             user.last_logged_in = datetime.datetime.utcnow()
             db.session.add(user)
             db.session.commit()
-        login_user(user, remember=form.remember_me.data)
+        if user.kind == 'Hospital':
+            exists = bool(HospitalUsers.query.filter_by(personal_id=form.personal_id.data).first())
+            if exists:
+                hospitaluser = HospitalUsers.query.filter_by(personal_id=form.personal_id.data).first()
+                if (hospitaluser.name is None) or (hospitaluser.address is None) or (
+                        hospitaluser.medical_services is None):
+                    flash('Hospital')
+                    return redirect(url_for('updatefirsthospital'))
+            else:
+                flash('Hospital')
+                return redirect(url_for('updatefirsthospital'))
+        elif user.kind == 'Paciente':
+            exists = bool(PacientUsers.query.filter_by(personal_id=form.personal_id.data).first())
+            if exists:
+                pacientuser = PacientUsers.query.filter_by(personal_id=form.personal_id.data).first()
+                if (pacientuser.name is None) or (pacientuser.address is None) or (
+                        pacientuser.dob is None):
+                    flash('Paciente')
+                    return redirect(url_for('updatefirstpacient'))
+            else:
+                flash('Paciente')
+                return redirect(url_for('updatefirstpacient'))
         return redirect(url_for('index'))
     return render_template('login.html', title='Sign In', form=form)
 
@@ -94,24 +114,37 @@ def confirm_email(token):
     return redirect(url_for('login'))
 
 
-@app.route('/checkuser', methods=['GET', 'POST'])
-@login_required
-def checkuser():
-    user_id = current_user.personal_id
-    return jsonify({'id': user_id})
-
-
-@app.route('/updatefirst', methods=['GET', 'POST'])
-def updatefirst():
+@app.route('/updatefirsthospital', methods=['GET', 'POST'])
+def updatefirsthospital():
     if current_user.is_authenticated:
         form = HospitalForm()
         if form.validate_on_submit():
             hospitaluser = HospitalUsers(public_id=current_user.public_id, personal_id=current_user.personal_id,
-                         name=form.name.data, address=form.address.data, medical_services=form.medical_services.data, last_logged_in=current_user.last_logged_in)
+                                         name=form.name.data, address=form.address.data,
+                                         medical_services=form.medical_services.data, is_doctor=form.is_doctor.data,
+                                         last_logged_in=current_user.last_logged_in)
             db.session.add(hospitaluser)
             db.session.commit()
             flash('Se ha actualizado la información')
             return redirect(url_for('index'))
         return render_template('hospital.html', title='Actualización de Datos', form=form)
+    else:
+        return redirect(url_for('login'))
+
+
+@app.route('/updatefirstpacient', methods=['GET', 'POST'])
+def updatefirstpacient():
+    if current_user.is_authenticated:
+        form = PacientForm()
+        if form.validate_on_submit():
+            pacientuser = PacientUsers(public_id=current_user.public_id, personal_id=current_user.personal_id,
+                                       name=form.name.data, address=form.address.data,
+                                       dob=form.dob.data,
+                                       last_logged_in=current_user.last_logged_in)
+            db.session.add(pacientuser)
+            db.session.commit()
+            flash('Se ha actualizado la información')
+            return redirect(url_for('index'))
+        return render_template('pacient.html', title='Actualización de Datos', form=form)
     else:
         return redirect(url_for('login'))

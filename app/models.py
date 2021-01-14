@@ -17,7 +17,6 @@ class Users(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     public_id = db.Column(db.String(200))
     personal_id = db.Column(db.String(15), unique=True)
-    dob = db.Column(db.DateTime)
     password = db.Column(db.String(200))
     email = db.Column(db.String(50))
     phone = db.Column(db.String(15))
@@ -69,12 +68,32 @@ class HospitalUsers(db.Model, UserMixin):
     is_doctor = db.Column(db.Boolean)
     last_logged_in = db.Column(db.DateTime)
 
-    def __init__(self, public_id, personal_id, name, address, medical_services, last_logged_in):
+    def __init__(self, public_id, personal_id, name, address, medical_services, last_logged_in, is_doctor):
         self.public_id = public_id
         self.personal_id = personal_id
         self.name = name
         self.address = address
         self.medical_services = medical_services
+        self.last_logged_in = last_logged_in
+        self.is_doctor = is_doctor
+
+
+class PacientUsers(db.Model, UserMixin):
+    __tablename__ = 'pacientusers'
+    id = db.Column(db.Integer, primary_key=True)
+    public_id = db.Column(db.String(200))
+    personal_id = db.Column(db.String(15), unique=True)
+    name = db.Column(db.String(50))
+    address = db.Column(db.String(300))
+    dob = db.Column(db.DateTime)
+    last_logged_in = db.Column(db.DateTime)
+
+    def __init__(self, public_id, personal_id, name, address, dob, last_logged_in):
+        self.public_id = public_id
+        self.personal_id = personal_id
+        self.name = name
+        self.address = address
+        self.dob = dob
         self.last_logged_in = last_logged_in
 
 

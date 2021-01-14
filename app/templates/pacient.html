@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Usuario tipo 'Hospital'</h1>
+    <h1>Usuario tipo 'Paciente'</h1>
     <form action="" method="post">
         <!-- hidden_tag() is used to generate a hidden field that includes a token-->
         <!-- used to protecto the from against CSRF attacks --> 
@@ -21,15 +21,8 @@
             {% endfor %}
         </p>
         <p>
-            {{ form.is_doctor.label }}
-            <input type="checkbox" name="is_doctor"/>
-        </p>
-        <p>
-            {{ form.medical_services.label }}<br>
-            {{ form.medical_services(size=64) }}<br>
-            {% for error in form.medical_services.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
+            {{ form.dob.label }}<br>
+            {{ form.dob }}<br>
         </p>
         <p>{{ form.submit() }}</p>
     </form>
