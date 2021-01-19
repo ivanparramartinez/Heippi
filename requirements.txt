@@ -30,3 +30,4 @@ SQLAlchemy==1.3.22
 user-blueprint==0.3.0
 Werkzeug==1.0.1
 WTForms==2.3.3
+gunicorn
