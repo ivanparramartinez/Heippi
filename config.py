@@ -15,7 +15,7 @@ class Config(object):
     MAIL_USE_TLS = True
     MAIL_USE_SSL = False
 
-    # gmail authentication
+    # mail authentication
     MAIL_USERNAME = '300e0855b7add0'
     MAIL_PASSWORD = 'cd4dd85b6b8b9f'
 
