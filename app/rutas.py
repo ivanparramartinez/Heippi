@@ -269,6 +269,7 @@ def consultar_registros():
     registros_list = []
     for registro in registros:
         registros_list.append({
+            'hospital': 'Hospital Heippi',
             'paciente_id': registro.paciente_id,
             'medico_id': registro.medico_id,
             'especialidad': registro.specialty,
