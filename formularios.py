@@ -51,3 +51,8 @@ class ChangePasswordForm(FlaskForm):
     password = PasswordField('Contraseña', validators=[DataRequired(), Length(min=6, max=255)])
     password2 = PasswordField('Repetir Contraseña', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Actualizar Contraseña')
+
+
+class ResetPasswordForm(FlaskForm):
+    personal_id = StringField('Identificación', validators=[DataRequired()])
+    submit = SubmitField('Recuperar Contraseña')

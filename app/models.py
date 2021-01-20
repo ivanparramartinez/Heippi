@@ -26,6 +26,7 @@ class Users(db.Model, UserMixin):
     confirmed = db.Column(db.Boolean)
     last_logged_in = db.Column(db.DateTime)
     passchn = db.Column(db.Boolean)
+    recover_token = db.Column(db.String(200))
 
     def set_password(self, password):
         self.password = generate_password_hash(password)
@@ -133,19 +134,21 @@ class PacientUsers(db.Model, UserMixin):
 class Registros(db.Model):
     __tablename__ = 'registros'
     id = db.Column(db.Integer, primary_key=True)
-    public_id = db.Column(db.String(200))
-    personal_id = db.Column(db.String(15), unique=True)
-    med_obs = db.Column(db.String(200))
-    spec = db.Column(db.String(50))
-    estado_salud = db.Column(db.String(20))
-    kind = db.Column(db.String(20))
+    paciente_id = db.Column(db.String(15), unique=True)
+    medico_id = db.Column(db.String(15))
+    specialty = db.Column(db.String(50))
+    med_obs = db.Column(db.String(500))
+    estado_salud = db.Column(db.String(50))
+    med_creator_id = db.Column(db.String(15))
+    created_on = db.Column(db.DateTime, nullable=False)
+    last_modifying = db.Column(db.DateTime, nullable=False)
 
-    def __init__(self, public_id, personal_id, password, email, phone, kind, confirmed):
-        self.public_id = public_id
-        self.personal_id = personal_id
-        self.password = password
-        self.email = email
-        self.phone = phone
-        self.kind = kind
-        self.registered_on = datetime.datetime.now()
-        self.confirmed = confirmed
+    def __init__(self, paciente_id, medico_id, specialty, med_obs, estado_salud, med_creator_id, created_on, last_modifying):
+        self.paciente_id = paciente_id
+        self.medico_id = medico_id
+        self.specialty = specialty
+        self.med_obs = med_obs
+        self.estado_salud = estado_salud
+        self.med_creator_id = med_creator_id
+        self.created_on = created_on
+        self.last_modifying = last_modifying

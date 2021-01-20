@@ -1,5 +1,5 @@
 from app import app, db
-from flask import jsonify, request, render_template, flash, redirect, url_for
+from flask import jsonify, request, render_template, flash, redirect, url_for, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.models import Users, HospitalUsers, PacientUsers, Registros, MedicalUsers
 import uuid
@@ -7,7 +7,8 @@ import datetime
 from app.tokens import generate_confirmation_token, confirm_token
 from flask_login import login_required, login_user, logout_user, current_user
 from app.email import send_email
-from formularios import LoginForm, RegistrationForm, HospitalForm, PacientForm, ChangePasswordForm, MedicalForm
+from formularios import LoginForm, RegistrationForm, HospitalForm, PacientForm, ChangePasswordForm, MedicalForm, \
+    ResetPasswordForm
 
 
 @app.route('/')
@@ -34,7 +35,8 @@ def register():
             flash("El usuario ya está registrado")
             return redirect(url_for('login'))
         user = Users(public_id=str(uuid.uuid4()), personal_id=form.personal_id.data,
-                     password=generate_password_hash(form.password.data), name=None,email=form.email.data, phone=form.phone.data,
+                     password=generate_password_hash(form.password.data), name=None, email=form.email.data,
+                     phone=form.phone.data,
                      kind=request.form.get('kind'), confirmed=False)
         db.session.add(user)
         db.session.commit()
@@ -115,7 +117,8 @@ def createdoctor():
                                      medical_services='Médico', is_doctor=True, specialty=form.specialty.data,
                                      creator=current_user.personal_id)
         user = Users(public_id=str(uuid.uuid4()), personal_id=form.personal_id.data,
-                     password=generate_password_hash(form.password.data), name=form.name.data, email=form.email.data, phone=form.phone.data,
+                     password=generate_password_hash(form.password.data), name=form.name.data, email=form.email.data,
+                     phone=form.phone.data,
                      kind='Médico', confirmed=False)
         db.session.add(hospitaluser)
         db.session.add(user)
@@ -187,17 +190,59 @@ def changepassword():
 def confirm_email(token):
     try:
         personal_id = confirm_token(token)
+        user = Users.query.filter_by(personal_id=personal_id).first_or_404()
+        if user.confirmed:
+            flash('Esta cuenta ya ha sido confirmada, por favor inicie sesión.')
+        else:
+            user.confirmed = True
+            db.session.add(user)
+            db.session.commit()
+            flash('¡Has confirmado tu cuenta! ¡Gracias!')
     except:
         flash('El link de confirmación es erróneo o ha expirado')
-    user = Users.query.filter_by(personal_id=personal_id).first_or_404()
-    if user.confirmed:
-        flash('Esta cuenta ya ha sido confirmada, por favor inicie sesión.')
-    else:
-        user.confirmed = True
-        db.session.add(user)
-        db.session.commit()
-        flash('¡Has confirmado tu cuenta! ¡Gracias!')
+        abort(401)
     return redirect(url_for('login'))
+
+
+@app.route('/resetpassword', methods=['GET', 'POST'])
+def resetpassword():
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        token = generate_confirmation_token(form.personal_id.data)
+        user = Users.query.filter_by(personal_id=form.personal_id.data).first_or_404()
+        recover_url = url_for('recover_pass', token=token, _external=True)
+        html = render_template('forgotpass.html', recover_url=recover_url)
+        subject = "Recuperación de Contraseña. Hospital Heippi."
+        send_email(user.email, subject, html)
+        flash('Se ha enviado un correo con el link para la recuperación de su contraseña.')
+    return render_template('resetpassword.html', title='Recuperación de Contraseña', form=form)
+
+
+@app.route('/recover_pass/<token>', methods=['GET','POST'])
+def recover_pass(token):
+    exists = bool(Users.query.filter_by(recover_token=token).first())
+    if exists:
+        flash('Este link de recuperación ya ha sido utilizado')
+        return redirect(url_for('login'))
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        personal_id = confirm_token(token)
+        user = Users.query.filter_by(personal_id=personal_id).first_or_404()
+        if not user.recover_token == token:
+            if user.check_password(form.password.data):
+                flash('La contraseña no puede ser igual a la anterior')
+                return redirect(url_for('recover_pass'))
+            else:
+                user.password = generate_password_hash(form.password.data)
+                user.recover_token = token
+                db.session.add(user)
+                db.session.commit()
+                flash('Contraseña Actualizada')
+                return redirect(url_for('index'))
+        else:
+            flash('El link de recuperación ya ha sido utilizado')
+            return redirect(url_for('index'))
+    return render_template('recover_pass.html', form=form)
 
 
 @app.route('/logout')
@@ -207,3 +252,9 @@ def logout():
         return render_template('logout.html', title='Home')
     else:
         return render_template('notlogged.html', title='Home')
+
+
+@app.route('/consultar_registros', methods=['GET','POST'])
+@login_required
+def consultar_registros():
+    pass

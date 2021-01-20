@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='style.css') }}">
       {% if title %}
       <title>{{ title }} - Hospital Heippi API Rest</title>
       {% else %}
@@ -8,7 +9,8 @@
       {% endif %}
     </head>
     <body>
-        <div>
+    <header class="header">
+        <div class="menu">
             <a href="/">Inicio</a>
             {% if current_user.is_authenticated %}
             {% else %}
@@ -26,7 +28,11 @@
             {% if current_user.is_authenticated and (current_user.kind == 'Hospital') %}
             <a href="/createdoctor">Crear Médico</a>
             {% endif %}
+            {% if current_user.is_authenticated %}
+            <a href="/consultar_registros">Consultar Registros</a>
+            {% endif %}
         </div>
+    </header>
         <hr>
         {% with messages = get_flashed_messages() %}
         {% if messages %}
