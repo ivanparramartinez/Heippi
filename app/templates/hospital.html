@@ -21,10 +21,6 @@
             {% endfor %}
         </p>
         <p>
-            {{ form.is_doctor.label }}
-            <input type="checkbox" name="is_doctor"/>
-        </p>
-        <p>
             {{ form.medical_services.label }}<br>
             {{ form.medical_services(size=64) }}<br>
             {% for error in form.medical_services.errors %}

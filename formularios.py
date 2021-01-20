@@ -16,7 +16,7 @@ class RegistrationForm(FlaskForm):
     email = StringField('E-mail', validators=[DataRequired(), Email()])
     phone = StringField('Teléfono', validators=[DataRequired()])
     kind = SelectField('Tipo', choices=['Hospital', 'Paciente'])
-    password = PasswordField('Contraseña', validators=[DataRequired()])
+    password = PasswordField('Contraseña', validators=[DataRequired(), Length(min=6, max=255)])
     password2 = PasswordField('Repetir Contraseña', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Registrarse')
 
@@ -25,8 +25,19 @@ class HospitalForm(FlaskForm):
     name = StringField('Nombre', validators=[DataRequired()])
     address = StringField('Dirección', validators=[DataRequired()])
     medical_services = StringField('Servicios Médicos', validators=[DataRequired()])
-    is_doctor = BooleanField('¿Es Médico?')
     submit = SubmitField('Actualizar Datos')
+
+
+class MedicalForm(FlaskForm):
+    personal_id = StringField('Identificación', validators=[DataRequired()])
+    name = StringField('Nombre', validators=[DataRequired()])
+    address = StringField('Dirección', validators=[DataRequired()])
+    specialty =  SelectField('Especialidad', choices=['General', 'Cirugía', 'Medicina Interna', 'Fisiatría','Pediatría'])
+    email = StringField('E-mail', validators=[DataRequired(), Email()])
+    phone = StringField('Teléfono', validators=[DataRequired()])
+    password = PasswordField('Contraseña', validators=[DataRequired(), Length(min=6, max=255)])
+    password2 = PasswordField('Repetir Contraseña', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Crear Médico')
 
 
 class PacientForm(FlaskForm):

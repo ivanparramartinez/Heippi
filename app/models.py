@@ -18,12 +18,14 @@ class Users(db.Model, UserMixin):
     public_id = db.Column(db.String(200))
     personal_id = db.Column(db.String(15), unique=True)
     password = db.Column(db.String(200))
+    name = db.Column(db.String(100))
     email = db.Column(db.String(50))
     phone = db.Column(db.String(15))
     kind = db.Column(db.String(20))
     registered_on = db.Column(db.DateTime, nullable=False)
     confirmed = db.Column(db.Boolean)
     last_logged_in = db.Column(db.DateTime)
+    passchn = db.Column(db.Boolean)
 
     def set_password(self, password):
         self.password = generate_password_hash(password)
@@ -31,10 +33,11 @@ class Users(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
-    def __init__(self, public_id, personal_id, password, email, phone, kind, confirmed):
+    def __init__(self, public_id, personal_id, password, name, email, phone, kind, confirmed):
         self.public_id = public_id
         self.personal_id = personal_id
         self.password = password
+        self.name = name
         self.email = email
         self.phone = phone
         self.kind = kind
@@ -56,26 +59,58 @@ class Users(db.Model, UserMixin):
     def __repr__(self):
         return '<email {}'.format(self.email)
 
+    __mapper_args__ = {
+        'polymorphic_on': kind,
+    }
+
 
 class HospitalUsers(db.Model, UserMixin):
     __tablename__ = 'hospitalusers'
     id = db.Column(db.Integer, primary_key=True)
     public_id = db.Column(db.String(200))
     personal_id = db.Column(db.String(15), unique=True)
-    name = db.Column(db.String(50))
+    name = db.Column(db.String(100))
     address = db.Column(db.String(300))
     medical_services = db.Column(db.String(200))
     is_doctor = db.Column(db.Boolean)
-    last_logged_in = db.Column(db.DateTime)
+    dob = db.Column(db.Date)
+    specialty = db.Column(db.String(200))
+    creator = db.Column(db.String(200))
 
-    def __init__(self, public_id, personal_id, name, address, medical_services, last_logged_in, is_doctor):
+    def __init__(self, public_id, personal_id, name, address, medical_services, is_doctor, specialty, creator):
         self.public_id = public_id
         self.personal_id = personal_id
         self.name = name
         self.address = address
         self.medical_services = medical_services
-        self.last_logged_in = last_logged_in
         self.is_doctor = is_doctor
+        self.specialty = specialty
+        self.creator = creator
+
+
+class MedicalUsers(db.Model, UserMixin):
+    __tablename__ = 'medicalusers'
+    id = db.Column(db.Integer, primary_key=True)
+    public_id = db.Column(db.String(200))
+    personal_id = db.Column(db.String(15), unique=True)
+    hosp_user_pid = db.Column(db.String(15))
+    name = db.Column(db.String(50))
+    email = db.Column(db.String(50))
+    phone = db.Column(db.String(15))
+    address = db.Column(db.String(300))
+    specialty = db.Column(db.String(200))
+    registered_on = db.Column(db.DateTime, nullable=False)
+
+    def __init__(self, public_id, personal_id, hosp_user_id, name, email, phone, address, specialty):
+        self.public_id = public_id
+        self.personal_id = personal_id
+        self.hosp_user_pid = hosp_user_id
+        self.name = name
+        self.email = email
+        self.phone = phone
+        self.address = address
+        self.specialty = specialty
+        self.registered_on = datetime.datetime.now()
 
 
 class PacientUsers(db.Model, UserMixin):
@@ -86,7 +121,6 @@ class PacientUsers(db.Model, UserMixin):
     name = db.Column(db.String(50))
     address = db.Column(db.String(300))
     dob = db.Column(db.Date)
-    last_logged_in = db.Column(db.DateTime)
 
     def __init__(self, public_id, personal_id, name, address, dob, last_logged_in):
         self.public_id = public_id
@@ -94,7 +128,6 @@ class PacientUsers(db.Model, UserMixin):
         self.name = name
         self.address = address
         self.dob = dob
-        self.last_logged_in = last_logged_in
 
 
 class Registros(db.Model):
