@@ -9,6 +9,7 @@ from flask_login import login_required, login_user, logout_user, current_user
 from app.email import send_email
 from formularios import LoginForm, RegistrationForm, HospitalForm, PacientForm, ChangePasswordForm, MedicalForm, \
     ResetPasswordForm
+from sqlalchemy.orm import Session
 
 
 @app.route('/')
@@ -218,7 +219,7 @@ def resetpassword():
     return render_template('resetpassword.html', title='Recuperación de Contraseña', form=form)
 
 
-@app.route('/recover_pass/<token>', methods=['GET','POST'])
+@app.route('/recover_pass/<token>', methods=['GET', 'POST'])
 def recover_pass(token):
     exists = bool(Users.query.filter_by(recover_token=token).first())
     if exists:
@@ -254,7 +255,25 @@ def logout():
         return render_template('notlogged.html', title='Home')
 
 
-@app.route('/consultar_registros', methods=['GET','POST'])
+@app.route('/consultar_registros', methods=['GET', 'POST'])
 @login_required
 def consultar_registros():
-    pass
+    global registros
+    if current_user.kind == 'Médico':
+        registros = Registros.query.filter_by(medico_id=current_user.personal_id)
+    elif current_user.kind == 'Hospital':
+        registros = Registros.query.filter_by(med_creator_id=current_user.personal_id)
+    elif current_user.kind == 'Paciente':
+        registros = Registros.query.filter_by(paciente_id=current_user.personal_id)
+    # registros = Registros.query.all()
+    registros_list = []
+    for registro in registros:
+        registros_list.append({
+            'paciente_id': registro.paciente_id,
+            'medico_id': registro.medico_id,
+            'especialidad': registro.specialty,
+            'observaciones': registro.med_obs,
+            'estado_salud': registro.estado_salud,
+            'current_user': current_user.kind
+        })
+    return jsonify(registros_list)

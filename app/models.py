@@ -140,15 +140,11 @@ class Registros(db.Model):
     med_obs = db.Column(db.String(500))
     estado_salud = db.Column(db.String(50))
     med_creator_id = db.Column(db.String(15))
-    created_on = db.Column(db.DateTime, nullable=False)
-    last_modifying = db.Column(db.DateTime, nullable=False)
 
-    def __init__(self, paciente_id, medico_id, specialty, med_obs, estado_salud, med_creator_id, created_on, last_modifying):
+    def __init__(self, paciente_id, medico_id, specialty, med_obs, estado_salud, med_creator_id):
         self.paciente_id = paciente_id
         self.medico_id = medico_id
         self.specialty = specialty
         self.med_obs = med_obs
         self.estado_salud = estado_salud
         self.med_creator_id = med_creator_id
-        self.created_on = created_on
-        self.last_modifying = last_modifying
