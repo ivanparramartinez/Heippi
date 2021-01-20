@@ -30,6 +30,7 @@ from app import rutas, models
 
 
 app.config['JSON_AS_ASCII'] = False
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
 if __name__ == '__main__':
     app.run()
