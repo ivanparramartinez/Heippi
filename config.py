@@ -6,7 +6,8 @@ class Config(object):
     basedir = os.path.abspath(os.path.dirname(__file__))
     SQLALCHEMY_ECHO = False
     SQLALCHEMY_TRACK_MODIFICATIONS = True
-    SQLALCHEMY_DATABASE_URI = "postgres://hariktpwixnuwa:41f3f4dc5cc3051571b1acbf9501eb4a763aa93f97b61646e4e96f2069ebec67@ec2-3-230-106-126.compute-1.amazonaws.com:5432/d868akntnd7q88"
+    # SQLALCHEMY_DATABASE_URI = "postgres://hariktpwixnuwa:41f3f4dc5cc3051571b1acbf9501eb4a763aa93f97b61646e4e96f2069ebec67@ec2-3-230-106-126.compute-1.amazonaws.com:5432/d868akntnd7q88"
+    SQLALCHEMY_DATABASE_URI = "postgresql://postgres:Onemen2021@localhost:5432/postgres"
     SECURITY_PASSWORD_SALT = "ConfirmationEmail"
 
     # mail settings
